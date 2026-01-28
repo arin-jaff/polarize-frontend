@@ -9,13 +9,16 @@ import {
   getPowerZones,
   updateThresholds,
   updateZoneConfig,
+  getCoachSettings,
+  updateCoachSettings,
 } from '@/lib/api';
+import type { CoachSettings } from '@/types';
 import { useAuth } from '@/lib/auth-context';
 
 export default function SettingsPage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<'thresholds' | 'zones' | 'scaling' | 'integrations'>(
+  const [activeTab, setActiveTab] = useState<'thresholds' | 'zones' | 'scaling' | 'coach' | 'integrations'>(
     'thresholds'
   );
 
@@ -31,6 +34,7 @@ export default function SettingsPage() {
           { id: 'thresholds', label: 'Thresholds' },
           { id: 'zones', label: 'Zones' },
           { id: 'scaling', label: 'Sport Scaling' },
+          { id: 'coach', label: 'AI Coach' },
           { id: 'integrations', label: 'Integrations' },
         ].map(({ id, label }) => (
           <button
@@ -51,6 +55,7 @@ export default function SettingsPage() {
         {activeTab === 'thresholds' && <ThresholdsTab />}
         {activeTab === 'zones' && <ZonesTab />}
         {activeTab === 'scaling' && <ScalingTab primarySport={user?.primary_sport || 'rowing'} />}
+        {activeTab === 'coach' && <CoachTab />}
         {activeTab === 'integrations' && <IntegrationsTab />}
       </div>
     </div>
@@ -405,6 +410,226 @@ function IntegrationsTab() {
             Connect
           </button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function CoachTab() {
+  const queryClient = useQueryClient();
+  const [settings, setSettings] = useState<CoachSettings>({
+    coach_type: 'specialist',
+    training_plan: 'polarized',
+    time_constraint: 'moderate',
+  });
+
+  const { data: savedSettings, isLoading } = useQuery({
+    queryKey: ['coachSettings'],
+    queryFn: getCoachSettings,
+  });
+
+  // Update local state when data loads
+  useState(() => {
+    if (savedSettings) {
+      setSettings(savedSettings);
+    }
+  });
+
+  const mutation = useMutation({
+    mutationFn: (data: Partial<CoachSettings>) => updateCoachSettings(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['coachSettings'] });
+    },
+  });
+
+  const handleSave = () => {
+    mutation.mutate(settings);
+  };
+
+  // Sync local state with fetched data
+  if (savedSettings && settings.coach_type !== savedSettings.coach_type) {
+    setSettings(savedSettings);
+  }
+
+  const coachTypes = [
+    {
+      id: 'specialist',
+      name: 'Specialist',
+      description: 'Single-sport focus, maximize performance. Direct coaching style that pushes you to your limits.',
+    },
+    {
+      id: 'generalist',
+      name: 'Generalist',
+      description: 'Multi-sport balanced approach. Good for triathletes or those who enjoy variety.',
+      disabled: true,
+    },
+    {
+      id: 'recreational',
+      name: 'Recreational',
+      description: 'Fitness-focused with flexible scheduling. Perfect for maintaining health without intense pressure.',
+      disabled: true,
+    },
+  ];
+
+  const trainingPlans = [
+    {
+      id: 'polarized',
+      name: 'Polarized (80/20)',
+      description: '80% easy (Zone 1), 20% hard (Zone 3). No threshold work. Science-backed for endurance.',
+    },
+    {
+      id: 'traditional',
+      name: 'Traditional (Pyramidal)',
+      description: 'More time at threshold, pyramidal distribution. Classic approach.',
+      disabled: true,
+    },
+    {
+      id: 'threshold',
+      name: 'Sweet Spot',
+      description: 'Focus on sweet spot and threshold work. Time-efficient but demanding.',
+      disabled: true,
+    },
+  ];
+
+  const timeConstraints = [
+    { id: 'minimal', name: 'Minimal', hours: '0-5 hours/week', tss: '150-250 TSS' },
+    { id: 'moderate', name: 'Moderate', hours: '5-10 hours/week', tss: '250-400 TSS' },
+    { id: 'committed', name: 'Committed', hours: '10-15 hours/week', tss: '400-550 TSS' },
+    { id: 'serious', name: 'Serious', hours: '15-20 hours/week', tss: '550-750 TSS' },
+    { id: 'elite', name: 'Elite', hours: '20+ hours/week', tss: '750-1000+ TSS' },
+  ];
+
+  if (isLoading) {
+    return <div className="text-slate-500">Loading coach settings...</div>;
+  }
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h3 className="text-lg font-semibold">AI Coach Personality</h3>
+        <p className="text-slate-500 text-sm mt-1">
+          Configure how your AI coach approaches training recommendations.
+        </p>
+      </div>
+
+      {/* Coach Type */}
+      <div>
+        <h4 className="font-medium text-slate-700 mb-3">Coach Type</h4>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {coachTypes.map((type) => (
+            <button
+              key={type.id}
+              onClick={() => !type.disabled && setSettings({ ...settings, coach_type: type.id as CoachSettings['coach_type'] })}
+              disabled={type.disabled}
+              className={`p-4 border rounded-lg text-left transition-all ${
+                settings.coach_type === type.id
+                  ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200'
+                  : type.disabled
+                  ? 'border-slate-200 bg-slate-50 opacity-50 cursor-not-allowed'
+                  : 'border-slate-200 hover:border-slate-300'
+              }`}
+            >
+              <div className="font-medium text-slate-900">
+                {type.name}
+                {type.disabled && <span className="text-xs text-slate-400 ml-2">(Coming Soon)</span>}
+              </div>
+              <div className="text-sm text-slate-500 mt-1">{type.description}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Training Plan */}
+      <div>
+        <h4 className="font-medium text-slate-700 mb-3">Training Philosophy</h4>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {trainingPlans.map((plan) => (
+            <button
+              key={plan.id}
+              onClick={() => !plan.disabled && setSettings({ ...settings, training_plan: plan.id as CoachSettings['training_plan'] })}
+              disabled={plan.disabled}
+              className={`p-4 border rounded-lg text-left transition-all ${
+                settings.training_plan === plan.id
+                  ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200'
+                  : plan.disabled
+                  ? 'border-slate-200 bg-slate-50 opacity-50 cursor-not-allowed'
+                  : 'border-slate-200 hover:border-slate-300'
+              }`}
+            >
+              <div className="font-medium text-slate-900">
+                {plan.name}
+                {plan.disabled && <span className="text-xs text-slate-400 ml-2">(Coming Soon)</span>}
+              </div>
+              <div className="text-sm text-slate-500 mt-1">{plan.description}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Time Constraint */}
+      <div>
+        <h4 className="font-medium text-slate-700 mb-3">Weekly Time Commitment</h4>
+        <div className="space-y-2">
+          {timeConstraints.map((constraint) => (
+            <button
+              key={constraint.id}
+              onClick={() => setSettings({ ...settings, time_constraint: constraint.id as CoachSettings['time_constraint'] })}
+              className={`w-full p-3 border rounded-lg text-left transition-all flex items-center justify-between ${
+                settings.time_constraint === constraint.id
+                  ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200'
+                  : 'border-slate-200 hover:border-slate-300'
+              }`}
+            >
+              <div>
+                <span className="font-medium text-slate-900">{constraint.name}</span>
+                <span className="text-slate-500 ml-2">{constraint.hours}</span>
+              </div>
+              <span className="text-sm text-slate-400">{constraint.tss}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Specific Hours Override */}
+      <div>
+        <h4 className="font-medium text-slate-700 mb-3">Specific Weekly Hours (Optional)</h4>
+        <p className="text-sm text-slate-500 mb-2">
+          Override the time constraint category with a specific number of hours.
+        </p>
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            value={settings.weekly_hours_available || ''}
+            onChange={(e) =>
+              setSettings({
+                ...settings,
+                weekly_hours_available: e.target.value ? parseFloat(e.target.value) : undefined,
+              })
+            }
+            placeholder="e.g., 12"
+            min="0"
+            max="50"
+            step="0.5"
+            className="w-24 px-3 py-2 border border-slate-300 rounded-lg"
+          />
+          <span className="text-slate-500">hours/week</span>
+        </div>
+      </div>
+
+      <div className="pt-4 border-t border-slate-200">
+        <button
+          onClick={handleSave}
+          disabled={mutation.isPending}
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50"
+        >
+          {mutation.isPending ? 'Saving...' : 'Save Coach Settings'}
+        </button>
+        {mutation.isSuccess && (
+          <span className="ml-3 text-green-600 text-sm">Settings saved successfully!</span>
+        )}
+        {mutation.isError && (
+          <span className="ml-3 text-red-600 text-sm">Failed to save settings.</span>
+        )}
       </div>
     </div>
   );
