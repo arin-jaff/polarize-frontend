@@ -11,6 +11,7 @@ import {
   updateZoneConfig,
   getCoachSettings,
   updateCoachSettings,
+  getMe,
 } from '@/lib/api';
 import type { CoachSettings } from '@/types';
 import { useAuth } from '@/lib/auth-context';
@@ -91,14 +92,14 @@ function ThresholdsTab() {
 
   return (
     <div className="space-y-6">
-      <h3 className="text-lg font-semibold">Threshold Values</h3>
+      <h3 className="text-lg font-semibold text-black">Threshold Values</h3>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <h4 className="font-medium text-slate-700 mb-3">Heart Rate</h4>
+          <h4 className="font-medium text-black mb-3">Heart Rate</h4>
           <div className="space-y-3">
             <div>
-              <label className="block text-sm text-slate-600 mb-1">
+              <label className="block text-sm text-black mb-1">
                 Lactate Threshold HR (LTHR)
               </label>
               <div className="flex items-center gap-2">
@@ -109,26 +110,26 @@ function ThresholdsTab() {
                     setThresholds({ ...thresholds, threshold_hr: e.target.value })
                   }
                   placeholder="180"
-                  className="w-24 px-3 py-2 border border-slate-300 rounded-lg"
+                  className="w-24 px-3 py-2 border border-slate-300 rounded-lg text-black"
                 />
-                <span className="text-slate-500">bpm</span>
+                <span className="text-black">bpm</span>
               </div>
             </div>
             <div>
-              <label className="block text-sm text-slate-600 mb-1">Max Heart Rate</label>
+              <label className="block text-sm text-black mb-1">Max Heart Rate</label>
               <div className="flex items-center gap-2">
                 <input
                   type="number"
                   value={thresholds.max_hr}
                   onChange={(e) => setThresholds({ ...thresholds, max_hr: e.target.value })}
                   placeholder="200"
-                  className="w-24 px-3 py-2 border border-slate-300 rounded-lg"
+                  className="w-24 px-3 py-2 border border-slate-300 rounded-lg text-black"
                 />
-                <span className="text-slate-500">bpm</span>
+                <span className="text-black">bpm</span>
               </div>
             </div>
             <div>
-              <label className="block text-sm text-slate-600 mb-1">Resting Heart Rate</label>
+              <label className="block text-sm text-black mb-1">Resting Heart Rate</label>
               <div className="flex items-center gap-2">
                 <input
                   type="number"
@@ -137,19 +138,19 @@ function ThresholdsTab() {
                     setThresholds({ ...thresholds, resting_hr: e.target.value })
                   }
                   placeholder="50"
-                  className="w-24 px-3 py-2 border border-slate-300 rounded-lg"
+                  className="w-24 px-3 py-2 border border-slate-300 rounded-lg text-black"
                 />
-                <span className="text-slate-500">bpm</span>
+                <span className="text-black">bpm</span>
               </div>
             </div>
           </div>
         </div>
 
         <div>
-          <h4 className="font-medium text-slate-700 mb-3">Power</h4>
+          <h4 className="font-medium text-black mb-3">Power</h4>
           <div className="space-y-3">
             <div>
-              <label className="block text-sm text-slate-600 mb-1">
+              <label className="block text-sm text-black mb-1">
                 Functional Threshold Power (FTP)
               </label>
               <div className="flex items-center gap-2">
@@ -160,13 +161,13 @@ function ThresholdsTab() {
                     setThresholds({ ...thresholds, threshold_power: e.target.value })
                   }
                   placeholder="250"
-                  className="w-24 px-3 py-2 border border-slate-300 rounded-lg"
+                  className="w-24 px-3 py-2 border border-slate-300 rounded-lg text-black"
                 />
-                <span className="text-slate-500">W</span>
+                <span className="text-black">W</span>
               </div>
             </div>
             <div>
-              <label className="block text-sm text-slate-600 mb-1">
+              <label className="block text-sm text-black mb-1">
                 Running Threshold Power (rFTP)
               </label>
               <div className="flex items-center gap-2">
@@ -180,13 +181,13 @@ function ThresholdsTab() {
                     })
                   }
                   placeholder="280"
-                  className="w-24 px-3 py-2 border border-slate-300 rounded-lg"
+                  className="w-24 px-3 py-2 border border-slate-300 rounded-lg text-black"
                 />
-                <span className="text-slate-500">W</span>
+                <span className="text-black">W</span>
               </div>
             </div>
             <div>
-              <label className="block text-sm text-slate-600 mb-1">
+              <label className="block text-sm text-black mb-1">
                 Critical Power (CP) - Stryd
               </label>
               <div className="flex items-center gap-2">
@@ -197,9 +198,9 @@ function ThresholdsTab() {
                     setThresholds({ ...thresholds, critical_power: e.target.value })
                   }
                   placeholder="260"
-                  className="w-24 px-3 py-2 border border-slate-300 rounded-lg"
+                  className="w-24 px-3 py-2 border border-slate-300 rounded-lg text-black"
                 />
-                <span className="text-slate-500">W</span>
+                <span className="text-black">W</span>
               </div>
             </div>
           </div>
@@ -217,14 +218,14 @@ function ThresholdsTab() {
       {/* Your Zones Summary */}
       {(thresholds.threshold_hr || thresholds.max_hr || thresholds.threshold_power) && (
         <div className="border-t border-slate-200 pt-8 mt-8">
-          <h3 className="text-lg font-semibold mb-6">Your Zones Preview</h3>
+          <h3 className="text-lg font-semibold mb-6 text-black">Your Zones Preview</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* HR Zones Summary */}
             {thresholds.threshold_hr || thresholds.max_hr ? (
               <div>
-                <h4 className="font-medium text-slate-700 mb-4">Heart Rate (bpm)</h4>
-                <div className="space-y-2 text-sm">
+                <h4 className="font-medium text-black mb-4">Heart Rate (bpm)</h4>
+                <div className="space-y-2 text-sm text-black">
                   {thresholds.threshold_hr && (
                     <>
                       <div className="flex justify-between">
@@ -258,8 +259,8 @@ function ThresholdsTab() {
             {/* Power Zones Summary */}
             {thresholds.threshold_power ? (
               <div>
-                <h4 className="font-medium text-slate-700 mb-4">Power (watts)</h4>
-                <div className="space-y-2 text-sm">
+                <h4 className="font-medium text-black mb-4">Power (watts)</h4>
+                <div className="space-y-2 text-sm text-black">
                   <div className="flex justify-between">
                     <span>Zone 1 - Active:</span>
                     <span className="font-medium">0 - {Math.round(parseInt(thresholds.threshold_power) * 0.55)}</span>
@@ -291,20 +292,15 @@ function ThresholdsTab() {
 }
 
 function ZonesTab() {
-  const { data: hrZonesData } = useQuery({
-    queryKey: ['hrZones'],
-    queryFn: getHrZones,
+  const { data: user } = useQuery({
+    queryKey: ['user'],
+    queryFn: getMe,
   });
 
-  const { data: powerZonesData } = useQuery({
-    queryKey: ['powerZones'],
-    queryFn: getPowerZones,
-  });
-
-  // Extract threshold values from the zone data or use defaults
-  const lthr = hrZonesData?.thresholds?.threshold_hr || 0;
-  const maxHr = hrZonesData?.thresholds?.max_hr || 0;
-  const ftp = powerZonesData?.thresholds?.threshold_power || 0;
+  // Extract threshold values from user data
+  const lthr = user?.thresholds?.threshold_hr || 0;
+  const maxHr = user?.thresholds?.max_hr || 0;
+  const ftp = user?.thresholds?.threshold_power || 0;
 
   const hrZone1Max = lthr > 0 ? Math.round(lthr * 0.5) : '-';
   const hrZone2Max = lthr > 0 ? Math.round(lthr * 0.75) : '-';
@@ -338,7 +334,7 @@ function ZonesTab() {
     <div className="space-y-8">
       {/* Heart Rate Zones */}
       <div>
-        <h3 className="text-lg font-semibold mb-6">Heart Rate Zones</h3>
+        <h3 className="text-lg font-semibold mb-6 text-black">Heart Rate Zones</h3>
 
         {/* HR Zone Gradient with Dividers */}
         <div className="space-y-3">
@@ -358,11 +354,11 @@ function ZonesTab() {
           </div>
           
           {/* Zone labels */}
-          <div className="flex justify-between text-xs font-medium text-slate-700">
+          <div className="flex justify-between text-xs font-medium text-black">
             {hrZones.map((zone) => (
               <div key={zone.zone} className="flex-1 text-center">
                 <div>{zone.name}</div>
-                <div className="text-slate-500 text-xs">{typeof zone.max === 'number' ? Math.round(zone.max) : zone.max} bpm</div>
+                <div className="text-black text-xs">{typeof zone.max === 'number' ? Math.round(zone.max) : zone.max} bpm</div>
               </div>
             ))}
           </div>
@@ -371,7 +367,7 @@ function ZonesTab() {
 
       {/* Power Zones */}
       <div>
-        <h3 className="text-lg font-semibold mb-6">Power Zones</h3>
+        <h3 className="text-lg font-semibold mb-6 text-black">Power Zones</h3>
 
         {/* Power Zone Gradient with Dividers */}
         <div className="space-y-3">
@@ -391,11 +387,11 @@ function ZonesTab() {
           </div>
           
           {/* Zone labels */}
-          <div className="flex justify-between text-xs font-medium text-slate-700">
+          <div className="flex justify-between text-xs font-medium text-black">
             {powerZones.map((zone) => (
               <div key={zone.zone} className="flex-1 text-center">
                 <div>{zone.name}</div>
-                <div className="text-slate-500 text-xs">{typeof zone.max === 'number' ? Math.round(zone.max) : zone.max} W</div>
+                <div className="text-black text-xs">{typeof zone.max === 'number' ? Math.round(zone.max) : zone.max} W</div>
               </div>
             ))}
           </div>
@@ -404,15 +400,15 @@ function ZonesTab() {
 
       {/* Your Zones Summary */}
       <div className="border-t border-slate-200 pt-8 mt-8">
-        <h3 className="text-lg font-semibold mb-6">Your Zones</h3>
+        <h3 className="text-lg font-semibold mb-6 text-black">Your Zones</h3>
         
         {lthr > 0 || maxHr > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* HR Zones Summary */}
             {lthr > 0 || maxHr > 0 ? (
               <div>
-                <h4 className="font-medium text-slate-700 mb-4">Heart Rate (bpm)</h4>
-                <div className="space-y-2 text-sm">
+                <h4 className="font-medium text-black mb-4">Heart Rate (bpm)</h4>
+                <div className="space-y-2 text-sm text-black">
                   <div className="flex justify-between">
                     <span>Zone 1 - Recovery:</span>
                     <span className="font-medium">0 - {Math.round(lthr * 0.5)}</span>
@@ -467,11 +463,11 @@ function ZonesTab() {
                 </div>
               </div>
             ) : (
-              <div className="text-slate-500 text-sm">Set Power thresholds to see zones</div>
+              <div className="text-black text-sm">Set Power thresholds to see zones</div>
             )}
           </div>
         ) : (
-          <p className="text-slate-500 text-sm">Configure thresholds on the Thresholds tab to see your zones.</p>
+          <p className="text-black text-sm">Configure thresholds on the Thresholds tab to see your zones.</p>
         )}
       </div>
     </div>

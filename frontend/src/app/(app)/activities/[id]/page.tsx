@@ -29,10 +29,15 @@ export default function ActivityDetailPage() {
       return;
     }
 
+    if (isDeleting) return; // Prevent multiple clicks
+
     setIsDeleting(true);
     try {
       await deleteActivity(activityId);
-      router.push('/activities');
+      // Wait a moment before redirecting to ensure the delete completed
+      setTimeout(() => {
+        router.push('/activities');
+      }, 100);
     } catch (error) {
       alert('Failed to delete activity. Please try again.');
       setIsDeleting(false);
